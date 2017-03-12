@@ -14,9 +14,13 @@ output: html_document
 library(ggplot2)
 library(plyr)
 
+unzip("activity.zip")
 rawdevicedata<-read.csv("activity.csv")
 
 devicedata<-rawdevicedata
+
+# set type for date to Date
+devicedata$date<-as.Date(devicedata$date)
 
 # initial parse/validation of data
 head(devicedata)
@@ -25,28 +29,30 @@ dim(devicedata)
 n1<-nrow(devicedata)
 
 # remove NA values
-devicedata<-devicedata[complete.cases(devicedata),]
+hist1data<-devicedata[complete.cases(devicedata),]
 
 n2<-nrow(devicedata)
 
 print(paste0("Rows removed from dataset: ",n1-n2,"."))
 
-# set type for date to Date
-devicedata$date<-as.Date(devicedata$date)
 
-devicedata<-aggregate(steps~date,
-                      devicedata,
+hist1data<-aggregate(steps~date,
+                      hist1data,
                       sum)
 
 ```
 
 ### Histogram of the total number of steps taken each day
 ```{r histogram of total number of steps}
+dir.create("./figures",showWarnings = FALSE)
 
-plot(y=devicedata$steps,x=devicedata$date,type="h",
-     xlab="Date",ylab="Number of Steps",
-     main="Total Number of Steps per Day Oct. 1 to Dec. 1 2012")
+png("./figures/hist1.png",480,480)
+hist(hist1data$steps, 
+     main = "Mean Total Steps Per Day",
+     xlab="Mean Steps Per Day")
 
+
+dev.off()
   
 ```
 
@@ -70,13 +76,15 @@ print(paste0("Median number of steps across the 61 day period: ", medianDD, ".")
 ### Average Steps Time Series Plot
 ### Time series plot of the average number of steps taken
 ```{r time series plot}
-meandevicedata<-aggregate(steps~date,FUN=mean,data=rawdevicedata)
 
-meandevicedata$date<-as.Date(meandevicedata$date)
+meandevicedata<-aggregate(steps~interval,FUN=mean,data=devicedata)
+
+png("./figures/lineplot1.png",480,480)
 
 plot(meandevicedata,type="l",ylab="Mean Steps",
      xlab="Date",
      main="Mean Steps Per Day")
+dev.off()
 ```
 
 ### The 5-minute interval that, on average contains the maximum number of steps
@@ -110,30 +118,37 @@ completecases<-rawdevicedata[complete.cases(rawdevicedata), ]
 # recombine imputed rows and complete case rows
 tempdevicedata<-rbind(completecases,tempdevicedata)
 
+tempdevicedata$date<-as.Date(tempdevicedata$date)
+
 # recompute mean, including imputed days
-meandevicedata<-aggregate(steps~date,FUN=mean,data=tempdevicedata)
+meandevicedata<-aggregate(steps~interval,FUN=mean,data=tempdevicedata)
 
-# converte date feature to enable clean plot
-meandevicedata$date<-as.Date(meandevicedata$date)
-
+png("./figures/lineplot2.png",480,480)
 
 plot(meandevicedata,type="l",ylab="Mean Steps",
      xlab="Date",
      main="Mean Steps Per Day with Imputed Values")
+dev.off()
 ```
 
 ### Histogram with Imputed Data
 ```{r new histogram with imputed data}
 
-histdata<-aggregate(steps~date,
+hist2data<-aggregate(steps~date,
                       tempdevicedata,
                       sum)
 
-histdata$date<-as.Date(histdata$date)
+hist2data$date<-as.Date(hist2data$date)
 
-plot(y=histdata$steps,x=histdata$date,type="h",
-     xlab="Date",ylab="Number of Steps",
-     main="Total Number of Steps per Day Oct. 1 to Dec. 1 2012 - Imputed")
+
+
+png("./figures/hist2.png",480,480)
+hist(hist2data$steps, 
+     main = "Mean Total Steps Per Day - Imputed Data",
+     xlab="Mean Steps Per Day")
+
+
+dev.off()
 
 ```
 
@@ -158,7 +173,7 @@ wknddevicedata<-aggregate(steps~date,
                           wknddevicedata,
                           mean)
 
-
+png("./panelplot1.png",480,480)
 par(mfrow=c(1,2))
 plot(wknddevicedata,type="l",ylab="Mean Steps",
      xlab="Date",
@@ -174,7 +189,7 @@ plot(wkdydevicedata,type="l",ylab="Mean Steps",
      xlab="Date",
      ylim=c(0,80),
      main="Weekday - Mean Steps Per Day")
-
+dev.off()
 
 
 ```
