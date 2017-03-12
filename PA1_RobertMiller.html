@@ -206,7 +206,7 @@ print(paste0(&quot;Mean number of steps across the 61 day period: &quot;, meanDD
 png(&quot;./figures/lineplot1.png&quot;,480,480)
 
 plot(meandevicedata,type=&quot;l&quot;,ylab=&quot;Mean Steps&quot;,
-     xlab=&quot;Date&quot;,
+     xlab=&quot;Interval&quot;,
      main=&quot;Mean Steps Per Day&quot;)
 dev.off()</code></pre>
 <pre><code>## quartz_off_screen 
@@ -250,7 +250,7 @@ meandevicedata&lt;-aggregate(steps~interval,FUN=mean,data=tempdevicedata)
 png(&quot;./figures/lineplot2.png&quot;,480,480)
 
 plot(meandevicedata,type=&quot;l&quot;,ylab=&quot;Mean Steps&quot;,
-     xlab=&quot;Date&quot;,
+     xlab=&quot;Interval&quot;,
      main=&quot;Mean Steps Per Day with Imputed Values&quot;)
 dev.off()</code></pre>
 <pre><code>## quartz_off_screen 
@@ -292,25 +292,23 @@ wknddevicedata&lt;-tempdevicedata[tempdevicedata$wk==&quot;weekend&quot;,]
 wkdydevicedata&lt;-tempdevicedata[tempdevicedata$wk!=&quot;weekend&quot;,]
 
 
-wknddevicedata&lt;-aggregate(steps~date,
+wknddevicedata&lt;-aggregate(steps~interval,
                           wknddevicedata,
                           mean)
 
-png(&quot;./panelplot1.png&quot;,480,480)
-par(mfrow=c(1,2))
+png(&quot;./figures/panelplot1.png&quot;,480,480)
+par(mfrow=c(2,1))
 plot(wknddevicedata,type=&quot;l&quot;,ylab=&quot;Mean Steps&quot;,
-     xlab=&quot;Date&quot;,
-     ylim=c(0,80),
+     xlab=&quot;Interval&quot;,
      main=&quot;Weekend - Mean Steps Per Day&quot;)
 
-wkdydevicedata&lt;-aggregate(steps~date,
+wkdydevicedata&lt;-aggregate(steps~interval,
                           wkdydevicedata,
                           mean)
 
 
 plot(wkdydevicedata,type=&quot;l&quot;,ylab=&quot;Mean Steps&quot;,
-     xlab=&quot;Date&quot;,
-     ylim=c(0,80),
+     xlab=&quot;Interval&quot;,
      main=&quot;Weekday - Mean Steps Per Day&quot;)
 dev.off()</code></pre>
 <pre><code>## quartz_off_screen 

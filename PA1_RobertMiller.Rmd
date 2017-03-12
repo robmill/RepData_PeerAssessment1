@@ -82,7 +82,7 @@ meandevicedata<-aggregate(steps~interval,FUN=mean,data=devicedata)
 png("./figures/lineplot1.png",480,480)
 
 plot(meandevicedata,type="l",ylab="Mean Steps",
-     xlab="Date",
+     xlab="Interval",
      main="Mean Steps Per Day")
 dev.off()
 ```
@@ -126,7 +126,7 @@ meandevicedata<-aggregate(steps~interval,FUN=mean,data=tempdevicedata)
 png("./figures/lineplot2.png",480,480)
 
 plot(meandevicedata,type="l",ylab="Mean Steps",
-     xlab="Date",
+     xlab="Interval",
      main="Mean Steps Per Day with Imputed Values")
 dev.off()
 ```
@@ -169,25 +169,23 @@ wknddevicedata<-tempdevicedata[tempdevicedata$wk=="weekend",]
 wkdydevicedata<-tempdevicedata[tempdevicedata$wk!="weekend",]
 
 
-wknddevicedata<-aggregate(steps~date,
+wknddevicedata<-aggregate(steps~interval,
                           wknddevicedata,
                           mean)
 
-png("./panelplot1.png",480,480)
-par(mfrow=c(1,2))
+png("./figures/panelplot1.png",480,480)
+par(mfrow=c(2,1))
 plot(wknddevicedata,type="l",ylab="Mean Steps",
-     xlab="Date",
-     ylim=c(0,80),
+     xlab="Interval",
      main="Weekend - Mean Steps Per Day")
 
-wkdydevicedata<-aggregate(steps~date,
+wkdydevicedata<-aggregate(steps~interval,
                           wkdydevicedata,
                           mean)
 
 
 plot(wkdydevicedata,type="l",ylab="Mean Steps",
-     xlab="Date",
-     ylim=c(0,80),
+     xlab="Interval",
      main="Weekday - Mean Steps Per Day")
 dev.off()
 
