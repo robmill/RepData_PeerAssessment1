@@ -1,0 +1,180 @@
+---
+title: "PA1_template"
+output: html_document
+---
+
+# Reproducible Research
+## Peer-graded Assignment: Course Project 1
+### Robert Miller
+### March 12, 2017
+
+
+### Reading in dataset and processing
+```{r code for reading in dataset}
+library(ggplot2)
+library(plyr)
+
+rawdevicedata<-read.csv("activity.csv")
+
+devicedata<-rawdevicedata
+
+# initial parse/validation of data
+head(devicedata)
+dim(devicedata)
+
+n1<-nrow(devicedata)
+
+# remove NA values
+devicedata<-devicedata[complete.cases(devicedata),]
+
+n2<-nrow(devicedata)
+
+print(paste0("Rows removed from dataset: ",n1-n2,"."))
+
+# set type for date to Date
+devicedata$date<-as.Date(devicedata$date)
+
+devicedata<-aggregate(steps~date,
+                      devicedata,
+                      sum)
+
+```
+
+### Histogram of the total number of steps taken each day
+```{r histogram of total number of steps}
+
+plot(y=devicedata$steps,x=devicedata$date,type="h",
+     xlab="Date",ylab="Number of Steps",
+     main="Total Number of Steps per Day Oct. 1 to Dec. 1 2012")
+
+  
+```
+
+### Mean and Median Steps Per Day
+
+```{r mean/median steps}
+
+# Aggregate steps by day
+sumdevicedata<-aggregate(steps ~ date, FUN=sum, data=rawdevicedata)
+
+# output Mean and Median
+meanDD<-mean(sumdevicedata$steps)
+medianDD<-median(sumdevicedata$steps)
+
+# Output Mean and Median
+print(paste0("Mean number of steps across the 61 day period: ", meanDD, "."))
+print(paste0("Median number of steps across the 61 day period: ", medianDD, "."))
+
+```
+
+### Average Steps Time Series Plot
+### Time series plot of the average number of steps taken
+```{r time series plot}
+meandevicedata<-aggregate(steps~date,FUN=mean,data=rawdevicedata)
+
+meandevicedata$date<-as.Date(meandevicedata$date)
+
+plot(meandevicedata,type="l",ylab="Mean Steps",
+     xlab="Date",
+     main="Mean Steps Per Day")
+```
+
+### The 5-minute interval that, on average contains the maximum number of steps
+```{r}
+maxdates<-aggregate(steps~date,rawdevicedata,max)
+
+addInterval<-merge(maxdates,rawdevicedata)
+
+avgInterval<-as.integer(mean(addInterval$interval))
+print(paste0("Mean 5-minute interval that contains max steps: ", avgInterval, "."))
+
+```
+### Data Imputation
+```{r data imputation}
+
+# Assign raw dataset to temp dataset
+tempdevicedata<-rawdevicedata
+
+# Divide mean steps per day by number of intervals
+# assign to overwrite NA values
+tempdevicedata<-tempdevicedata[is.na(rawdevicedata$steps),]
+
+tempdevicedata$steps<-meanDD/288
+
+
+# carve out non-NA cases
+completecases<-rawdevicedata[complete.cases(rawdevicedata), ]
+
+
+
+# recombine imputed rows and complete case rows
+tempdevicedata<-rbind(completecases,tempdevicedata)
+
+# recompute mean, including imputed days
+meandevicedata<-aggregate(steps~date,FUN=mean,data=tempdevicedata)
+
+# converte date feature to enable clean plot
+meandevicedata$date<-as.Date(meandevicedata$date)
+
+
+plot(meandevicedata,type="l",ylab="Mean Steps",
+     xlab="Date",
+     main="Mean Steps Per Day with Imputed Values")
+```
+
+### Histogram with Imputed Data
+```{r new histogram with imputed data}
+
+histdata<-aggregate(steps~date,
+                      tempdevicedata,
+                      sum)
+
+histdata$date<-as.Date(histdata$date)
+
+plot(y=histdata$steps,x=histdata$date,type="h",
+     xlab="Date",ylab="Number of Steps",
+     main="Total Number of Steps per Day Oct. 1 to Dec. 1 2012 - Imputed")
+
+```
+
+### Comparison of Mean Steps Per Day by Weekday and Weekend
+```{r}
+
+wkndList<-c('Saturday','Sunday')
+
+
+tempdevicedata$date<-as.Date(tempdevicedata$date)
+
+tempdevicedata$wk<-factor((weekdays(tempdevicedata$date) %in% wkndList), levels = c(TRUE, FALSE),
+                    labels=c('weekend','weekday'))
+
+
+wknddevicedata<-tempdevicedata[tempdevicedata$wk=="weekend",]
+
+wkdydevicedata<-tempdevicedata[tempdevicedata$wk!="weekend",]
+
+
+wknddevicedata<-aggregate(steps~date,
+                          wknddevicedata,
+                          mean)
+
+
+par(mfrow=c(1,2))
+plot(wknddevicedata,type="l",ylab="Mean Steps",
+     xlab="Date",
+     ylim=c(0,80),
+     main="Weekend - Mean Steps Per Day")
+
+wkdydevicedata<-aggregate(steps~date,
+                          wkdydevicedata,
+                          mean)
+
+
+plot(wkdydevicedata,type="l",ylab="Mean Steps",
+     xlab="Date",
+     ylim=c(0,80),
+     main="Weekday - Mean Steps Per Day")
+
+
+
+```
